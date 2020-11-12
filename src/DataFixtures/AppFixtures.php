@@ -7,9 +7,19 @@ use App\Entity\User;
 use App\Entity\Comment;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
 {
+    /**
+     * @var UserPasswordEncoderInterface
+     */
+    private $passwordEncoder;
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    {
+        $this->passwordEncoder = $passwordEncoder;
+    }
     public function load(ObjectManager $manager)
     {
         $this->loadUsers($manager);
@@ -47,7 +57,7 @@ class AppFixtures extends Fixture
         $user = new User();
         $user->setUsername("username1");
         $user->setName("name1");
-        $user->setPassword("psw1");
+        $user->setPassword($this->passwordEncoder->encodePassword($user, "psw1"));
         $user->setEmail("email1@gmail.com");
         $this->addReference('username1', $user);
         $manager->persist($user);
@@ -56,7 +66,7 @@ class AppFixtures extends Fixture
         $user = new User();
         $user->setUsername("username2");
         $user->setName("name2");
-        $user->setPassword("psw2");
+        $user->setPassword($this->passwordEncoder->encodePassword($user, "psw2"));
         $user->setEmail("email2@gmail.com");
         $this->addReference('username2', $user);
 
