@@ -7,8 +7,9 @@ use App\Entity\User;
 use App\Entity\Comment;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Faker;
+use Faker\Factory;
 
 class AppFixtures extends Fixture
 {
@@ -16,9 +17,13 @@ class AppFixtures extends Fixture
      * @var UserPasswordEncoderInterface
      */
     private $passwordEncoder;
+
+    
+    private $faker;
     public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->passwordEncoder = $passwordEncoder;
+        $this->faker = Factory::create('fr_FR');
     }
     public function load(ObjectManager $manager)
     {
@@ -26,28 +31,24 @@ class AppFixtures extends Fixture
         $this->loadComments($manager);
         $this->loadBlogPosts($manager);
     }
-
+    
     public function loadBlogPosts(ObjectManager $manager)
     {
         $user = $this->getReference('username1');
-        $blogPost = new BlogPost();
-        $blogPost->setTitle("A first post!");
-        $blogPost->setPublished(new \DateTime('2020-11-09 14:34:00'));
-        $blogPost->setContent('Post text');
-        $blogPost->setAuthor($user);
-        $blogPost->setSlug('a-first-blog');
+        
+        for ($i = 0; $i < 100; $i++) {
+            $blogPost = new BlogPost();
+            $blogPost->setTitle($this->faker->realText(30));
+            $blogPost->setPublished($this->faker->dateTime);
+            $blogPost->setContent($this->faker->realText(10));
+            $blogPost->setAuthor($user);
+            $blogPost->setSlug($this->faker->slug);
 
-        $manager->persist($blogPost);
+            $this->setReference("blog_post$i", $blogPost);
 
-        $user = $this->getReference('username2');
-        $blogPost = new BlogPost();
-        $blogPost->setTitle("A second post!");
-        $blogPost->setPublished(new \DateTime('2020-11-09 14:35:00'));
-        $blogPost->setContent('Post text');
-        $blogPost->setAuthor($user);
-        $blogPost->setSlug('a-second-blog');
+            $manager->persist($blogPost);
+        }
 
-        $manager->persist($blogPost);
 
         $manager->flush();
     }
@@ -62,7 +63,7 @@ class AppFixtures extends Fixture
         $this->addReference('username1', $user);
         $manager->persist($user);
         $manager->flush();
-        
+
         $user = new User();
         $user->setUsername("username2");
         $user->setName("name2");
@@ -76,7 +77,16 @@ class AppFixtures extends Fixture
 
     public function loadComments(ObjectManager $manager)
     {
-        
-    }
+        for ($i = 0; $i < 100; $i++) {
+            $comment = new Comment();
+            $comment->setContent($this->faker->realText());
+            $comment->setPublished($this->faker->dateTimeThisYear);
+            $comment->setAuthor($this->getReference('username1'));
+            
+            $manager->persist($comment);
+        }
 
+        $manager->flush();
+
+    }
 }
