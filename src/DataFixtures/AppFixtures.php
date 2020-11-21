@@ -28,8 +28,8 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager)
     {
         $this->loadUsers($manager);
-        $this->loadComments($manager);
         $this->loadBlogPosts($manager);
+        $this->loadComments($manager);
     }
     
     public function loadBlogPosts(ObjectManager $manager)
@@ -44,7 +44,7 @@ class AppFixtures extends Fixture
             $blogPost->setAuthor($user);
             $blogPost->setSlug($this->faker->slug);
 
-            $this->setReference("blog_post$i", $blogPost);
+            $this->setReference("blog_post_$i", $blogPost);
 
             $manager->persist($blogPost);
         }
@@ -82,6 +82,7 @@ class AppFixtures extends Fixture
             $comment->setContent($this->faker->realText());
             $comment->setPublished($this->faker->dateTimeThisYear);
             $comment->setAuthor($this->getReference('username1'));
+            $comment->setBlogPost($this->getReference("blog_post_$i"));
             
             $manager->persist($comment);
         }
